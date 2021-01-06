@@ -1,3 +1,10 @@
+/** Baekjoon Online Judge
+*   Problem No. 17140
+*   이차원 배열과 연산 
+*   Writed by Rush.K
+*   Using Priority Queue
+*/
+
 package SCPC;
 
 import java.util.PriorityQueue;
@@ -30,9 +37,126 @@ class Value implements Comparable<Value>{
 }
 
 public class P17140 {
-
+	public static PriorityQueue<Value> sorting = new PriorityQueue<Value>();
+	public static PriorityQueue<Value> complete = new PriorityQueue<Value>();
+	public static int[][] A = new int[100][100];
+	public static int Ai = 2;
+	public static int Aj = 2;
+	
+	public static void rowChange() { // Operation R
+		boolean isFind = false;
+		Aj = 0;
+		
+		for (int i = 0; i < 100; i++) {
+			int j = 0;
+			
+			while (j < 100) { // sorting
+				if (A[i][j] == 0) {
+					j++;
+					continue;
+				}
+				if (j == 0) {
+					Value w = new Value(A[i][j], 1);
+					sorting.add(w);
+				} else {
+					while (!sorting.isEmpty()) {
+						Value temp = sorting.poll();
+						if (temp.x == A[i][j]) {
+							temp.num = temp.num + 1;
+							complete.add(temp);
+							while (!sorting.isEmpty()) {
+								complete.add(sorting.poll());
+							}
+							isFind = true;
+							break;
+						} else {
+							complete.add(temp);
+						}
+					}
+					if (isFind == false) {
+						Value w = new Value(A[i][j], 1);
+						complete.add(w);
+					}
+					while (!complete.isEmpty()) sorting.add(complete.poll());
+				}
+				isFind = false;
+				j++;
+			}
+			
+			j = 0;
+			
+			while (!sorting.isEmpty()) {
+				if (j == 100) {
+					while (!sorting.isEmpty()) sorting.poll();
+					break;
+				}
+				Value temp = sorting.poll();
+				A[i][j++] = temp.x;
+				A[i][j++] = temp.num;
+			}
+			Aj = Math.max(Aj, j);
+			for (; j < 100; j++) A[i][j] = 0;
+		}
+	}
+	
+	public static void colChange() { // Operation C
+		boolean isFind = false;
+		Ai = 0;
+		
+		for (int j = 0; j < 100; j++) {
+			int i = 0;
+			
+			while (i < 100) { // sorting
+				if (A[i][j] == 0) {
+					i++;
+					continue;
+				}
+				if (i == 0) {
+					Value w = new Value(A[i][j], 1);
+					sorting.add(w);
+				} else {
+					while (!sorting.isEmpty()) {
+						Value temp = sorting.poll();
+						if (temp.x == A[i][j]) {
+							temp.num = temp.num + 1;
+							complete.add(temp);
+							while (!sorting.isEmpty()) {
+								complete.add(sorting.poll());
+							}
+							isFind = true;
+							break;
+						} else {
+							complete.add(temp);
+						}
+					}
+					if (isFind == false) {
+						Value w = new Value(A[i][j], 1);
+						complete.add(w);
+					}
+					while (!complete.isEmpty()) sorting.add(complete.poll());
+				}
+				isFind = false;
+				i++;
+			}
+			
+			i = 0;
+			
+			while (!sorting.isEmpty()) {
+				if (i == 100) {
+					while (!sorting.isEmpty()) sorting.poll();
+					break;
+				}
+				Value temp = sorting.poll();
+				A[i++][j] = temp.x;
+				A[i++][j] = temp.num;
+			}
+			
+			Ai = Math.max(Ai, i);
+			for (; i < 100; i++) A[i][j] = 0;
+		}
+	}
+	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Scanner scanner = new Scanner(System.in);
 		
 		int r = scanner.nextInt();
@@ -40,124 +164,26 @@ public class P17140 {
 		int k = scanner.nextInt();
 		int time = 0;
 		
-		int[][] A = new int[100][100];
-
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
 				A[i][j] = scanner.nextInt();
 			}
 		}
 		
-		PriorityQueue<Value> sorting = new PriorityQueue<Value>();
-		PriorityQueue<Value> complete = new PriorityQueue<Value>();
-		boolean isFind = false;
-		
-		int Ai = 2;
-		int Aj = 2;
-		
-		int tj = 0;
-		int Tj = 0;
-		
-		while (!(A[r - 1][c - 1] == k)) {
-			if (time == 101) break;
+		while (!(A[r - 1][c - 1] == k)) { // Finding
+			if (time > 100) break;
+			
 			if (Ai >= Aj) {
-				for (int i = 0; i <= Ai; i++) {
-					for (int j = 0; j <=Aj; j++) {
-						int t = A[i][j];
-						if (sorting.isEmpty()) {
-							Value w = new Value(t, 1);
-							sorting.add(w);
-						} else {
-							while (!sorting.isEmpty()) {
-								Value temp = sorting.poll();
-								if (temp.x == t) {
-									temp.num = temp.num + 1;
-									complete.add(temp);
-									isFind = true;
-								} else {
-									if (sorting.isEmpty() && isFind == false) {
-										Value w = new Value(t, 1);
-										complete.add(temp);
-										complete.add(w);
-									} else {
-										complete.add(temp);
-									}
-								}
-							}
-							while (!complete.isEmpty()) {
-								Value temp = complete.poll();
-								sorting.add(temp);
-							}
-							isFind = false;
-						}
-					}
-					while (!sorting.isEmpty()) {
-						if (tj < 100) {
-							Value temp = sorting.poll();
-							//System.out.print(temp.x + "/" + temp.num + " ");
-							A[i][tj] = temp.x;
-							A[i][tj + 1] = temp.num;
-							tj = tj + 2;
-						}
-					}
-					for (int a = tj; a < 100; a++) A[i][a] = 0;
-					Tj = Math.max(Tj, tj - 1);
-					tj = 0;
-				}
-				Aj = Tj;
+				rowChange();
 			} else {
-				for (int j = 0; j <= Aj; j++) {
-					for (int i = 0; i <=Ai; i++) {
-						int t = A[i][j];
-						if (sorting.isEmpty()) {
-							Value w = new Value(t, 1);
-							sorting.add(w);
-						} else {
-							while (!sorting.isEmpty()) {
-								Value temp = sorting.poll();
-								if (temp.x == t) {
-									temp.num = temp.num + 1;
-									complete.add(temp);
-									isFind = true;
-								} else {
-									if (sorting.isEmpty() && isFind == false) {
-										Value w = new Value(t, 1);
-										complete.add(temp);
-										complete.add(w);
-									} else {
-										complete.add(temp);
-									}
-								}
-							}
-							while (!complete.isEmpty()) {
-								Value temp = complete.poll();
-								sorting.add(temp);
-							}
-							isFind = false;
-						}
-					}
-					while (!sorting.isEmpty()) {
-						if (tj < 100) {
-							Value temp = sorting.poll();
-							//System.out.print(temp.x + "/" + temp.num + " ");
-							A[tj][j] = temp.x;
-							A[tj + 1][j] = temp.num;
-							tj = tj + 2;
-						}
-					}
-					for (int a = tj; a < 100; a++) A[a][j] = 0;
-					Tj = Math.max(Tj, tj - 1);
-					tj = 0;
-				}
-				Ai = Tj;
+				colChange();
 			}
+			
 			time++;
 		}
 		
 		if (time == 101) time = -1;
-		
-		System.out.println();
-		
-		System.out.println(time);
+
+		System.out.println(time); // output
 	}
 }
